@@ -1,0 +1,21 @@
+* text=auto eol=lf
+
+# Configuration files use Windows-style CRLF when Wine reads them — but Wine
+# accepts LF too, so keep LF in the repo for sane diffs.
+*.conf  text eol=lf
+*.ini   text eol=lf
+
+# Native binaries — never touch line endings.
+*.dll   binary
+*.exe   binary
+*.dat   binary
+
+# ReShade shader files are plain text.
+*.fx    text eol=lf
+*.fxh   text eol=lf
+
+# Texture assets used by shaders.
+*.png   binary
+*.jpg   binary
+*.dds   binary
+*.tga   binary

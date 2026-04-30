@@ -1,0 +1,20 @@
+{
+  "id": "neocron-graphics-pack",
+  "name": "Enhanced Graphics (dgVoodoo2 + ReShade)",
+  "version": "0.1.0",
+  "author": "Neocron Community",
+  "description": "Modernizes Neocron 2's renderer by wrapping DirectX 8 through dgVoodoo2 (D3D11 backend) and stacking ReShade on top for post-processing shaders. Works under Proton, native Wine, and Windows.",
+  "category": "graphics",
+  "tags": ["dgvoodoo", "reshade", "directx", "d3d8", "renderer", "shaders"],
+  "files": [
+    { "src": "D3D8.dll",        "dst": "D3D8.dll" },
+    { "src": "dgVoodoo.conf",   "dst": "dgVoodoo.conf" },
+    { "src": "dxgi.dll",        "dst": "dxgi.dll" },
+    { "src": "ReShade.ini",     "dst": "ReShade.ini" },
+    { "src": "ReShadePreset.ini","dst": "ReShadePreset.ini" },
+    { "src": "reshade-shaders", "dst": "reshade-shaders" }
+  ],
+  "wineDllOverrides": ["d3d8", "dxgi"],
+  "conflicts": [],
+  "requires": []
+}

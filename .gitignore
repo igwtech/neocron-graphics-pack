@@ -1,0 +1,24 @@
+# Local-only artifacts. The DLLs themselves are tracked — they're the point of
+# this repo — but development byproducts aren't.
+
+# Editor crud
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Build/release scratch
+release/
+dist/
+*.tar.gz
+*.zip
+
+# ReShade runtime artifacts that shouldn't be committed
+ReShade.log
+ReShade*.log
+reshade-screenshots/
+
+# dgVoodoo2 runtime artifacts
+dgVoodoo.log
