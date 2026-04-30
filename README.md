@@ -29,9 +29,10 @@ You get:
 2. Paste `https://github.com/igwtech/neocron-graphics-pack` → **Install**.
 3. The launcher auto-fetches dgVoodoo2 from its GitHub release; configs and
    shader directory structure ship with this repo.
-4. Drop in ReShade's `dxgi.dll` and the shader pack (one-time, ~3 minutes —
-   see "Manual steps" below). Both come straight from upstream because
-   ReShade's authors ask redistributors not to bundle their binaries.
+4. The addon card will show a pulsing **"3 file(s) missing"** badge — that's
+   the launcher reporting which manual steps still need doing. Hover for the
+   list. Complete them (see "Manual steps" below) and the badge disappears
+   on next refresh.
 5. Launch the game.
 
 The launcher composes `WINEDLLOVERRIDES=quartz=n,b;d3d8=n,b;dxgi=n,b`

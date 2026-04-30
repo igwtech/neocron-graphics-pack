@@ -22,6 +22,11 @@
     }
   ],
   "wineDllOverrides": ["d3d8", "dxgi"],
+  "expects": [
+    "dxgi.dll",
+    "reshade-shaders/Shaders",
+    "reshade-shaders/Textures"
+  ],
   "conflicts": [],
   "requires": []
 }
