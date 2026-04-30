@@ -18,8 +18,13 @@ preferences.
   16× AF, vsync on, resolution unforced to preserve hard-coded HUD layout).
 - `ReShade.ini` minimal config pointing at `./reshade-shaders/Shaders` and
   `./reshade-shaders/Textures`.
-- `ReShadePreset.ini` with SMAA + LumaSharpen + AmbientLight enabled by
-  default — modest upgrades that don't change the game's look drastically.
+- `ReShadePreset.ini` with a Neocron-tuned cyberpunk pipeline:
+    - **SMAA** — kills edge crawl on stair-stepped geometry
+    - **MXAO** — adds the contact shadows the original engine never had
+    - **Bloom** (cyan-tinted) — makes the city's neon signs and HUD light glow
+    - **LevelsPlus** — crushes blacks (18/255) for that filmic deep-shadow look
+    - **Vibrance** — boosts neon saturation without flattening skin tones
+    - **AdaptiveSharpen** — recovers texture detail buried under bilinear filtering
 
 ### Pinned upstream versions
 
@@ -28,4 +33,8 @@ preferences.
   `fetch.from` URL in `addon.json` to track newer releases.
 - `dxgi.dll`: ReShade — **manual install** from <https://reshade.me>.
   No version pinned; users get current.
-- shader pack: crosire/reshade-shaders **slim** branch — manual clone.
+- shader pack: crosire/reshade-shaders **nvidia** branch — manual clone.
+  This is the only mainstream pack that ships all six default-preset
+  techniques (SMAA + MXAO + Bloom + LevelsPlus + Vibrance + AdaptiveSharpen).
+  The slim branch ships only 5 shaders (none matching this preset);
+  legacy ships ~20 but lacks SMAA and MXAO.

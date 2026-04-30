@@ -63,14 +63,26 @@ We respect that. Here's the minimal-friction path:
 
 ### 2. Shader pack
 
+The default `ReShadePreset.ini` references SMAA, MXAO, Bloom, LevelsPlus,
+Vibrance, and AdaptiveSharpen — the **`nvidia` branch** of crosire's
+reshade-shaders is the only mainstream pack that ships all six together.
+The `slim` branch is too minimal; `legacy` is missing SMAA + MXAO.
+
 ```bash
-git clone -b slim --depth 1 https://github.com/crosire/reshade-shaders \
+git clone -b nvidia --depth 1 https://github.com/crosire/reshade-shaders \
   /tmp/reshade-shaders
-cp -r /tmp/reshade-shaders/Shaders /tmp/reshade-shaders/Textures \
-  ~/Neocron2/reshade-shaders/
+mkdir -p ~/Neocron2/reshade-shaders/Shaders ~/Neocron2/reshade-shaders/Textures
+cp /tmp/reshade-shaders/ShadersAndTextures/*.fx \
+   /tmp/reshade-shaders/ShadersAndTextures/*.fxh \
+   ~/Neocron2/reshade-shaders/Shaders/
+find /tmp/reshade-shaders/ShadersAndTextures -maxdepth 1 -type f \
+   \( -name "*.png" -o -name "*.jpg" -o -name "*.dds" -o -name "*.tga" \) \
+   -exec cp {} ~/Neocron2/reshade-shaders/Textures/ \;
 ```
 
-(Adjust `~/Neocron2/` to your install dir.)
+(Adjust `~/Neocron2/` to your install dir. The nvidia branch flattens
+shaders + textures into one `ShadersAndTextures/` directory; ReShade
+expects them split, so the script above does the split for you.)
 
 ### 3. Verify
 
