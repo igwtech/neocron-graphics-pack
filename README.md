@@ -1,6 +1,6 @@
 # Neocron Graphics Pack — dgVoodoo2 + ReShade
 
-Modernizes the Neocron 2 renderer. Installs into the game directory through the
+Modernizes the Neocron 2 renderer. Installs through the
 [Neocron Launcher](https://github.com/igwtech/Neocron-Launcher) addon system —
 no manual file copying, no broken layered overrides, no clobbering on game
 patch.
@@ -27,94 +27,77 @@ You get:
 
 1. Open the launcher → **Addons** tab.
 2. Paste `https://github.com/igwtech/neocron-graphics-pack` → **Install**.
-3. The addon is auto-enabled. Launch the game — dgVoodoo2 + ReShade are active.
+3. The launcher auto-fetches dgVoodoo2 from its GitHub release; configs and
+   shader directory structure ship with this repo.
+4. Drop in ReShade's `dxgi.dll` and the shader pack (one-time, ~3 minutes —
+   see "Manual steps" below). Both come straight from upstream because
+   ReShade's authors ask redistributors not to bundle their binaries.
+5. Launch the game.
 
 The launcher composes `WINEDLLOVERRIDES=quartz=n,b;d3d8=n,b;dxgi=n,b`
 automatically; no Proton tweaking required.
 
-## Forking and publishing your own version
+## What's bundled vs auto-fetched vs manual
 
-This repo is the **skeleton** — it does not redistribute the dgVoodoo2 or
-ReShade binaries themselves. You drop in upstream binaries, push to your own
-GitHub, and the launcher pulls from there.
+| Component | Source | How |
+|---|---|---|
+| `dgVoodoo.conf`, `ReShade.ini`, `ReShadePreset.ini` | this repo | Bundled — copied straight in |
+| `D3D8.dll` (dgVoodoo2 v2.87.1, MS/x86) | <https://github.com/dege-diosg/dgVoodoo2/releases> | **Auto-fetched** by launcher on install |
+| `dxgi.dll` (ReShade) | <https://reshade.me> | **Manual** (see below) |
+| `reshade-shaders/` (curated shader pack) | <https://github.com/crosire/reshade-shaders> | **Manual** (see below) |
 
-### 1. Fork or clone
+## Manual steps (one-time)
 
-```bash
-git clone https://github.com/igwtech/neocron-graphics-pack.git
-cd neocron-graphics-pack
-```
+ReShade's authors explicitly ask people not to redistribute the binaries or
+shader files — they want every user to download fresh from the official site.
+We respect that. Here's the minimal-friction path:
 
-(Or fork to your own GitHub account if you want to publish a variant.)
-
-### 2. Drop in dgVoodoo2
-
-1. Download the latest from <http://dege.freeweb.hu/> (or
-   <https://github.com/dege-diosg/dgVoodoo2/releases>).
-2. Extract `MS/x86/D3D8.dll` (NOT x64 — Neocron is 32-bit).
-3. Copy it to the repo root as `D3D8.dll`.
-4. (Optional) `dgVoodooCpl.exe` lets you tune `dgVoodoo.conf` with a UI.
-
-The included `dgVoodoo.conf` is preconfigured for Neocron:
-- Best-available D3D11 backend
-- VSync on, triple-buffering
-- 16× anisotropic, 8× MSAA
-- Resolution unforced (Neocron has hard-coded UI coordinates — overriding
-  resolution misaligns HUD/menus). Pick your screen mode in-game instead.
-
-### 3. Drop in ReShade
+### 1. ReShade dxgi.dll
 
 1. Download "ReShade with full add-on support" from <https://reshade.me>.
-2. The installer is the only way to extract `dxgi.dll`. Run it against any
-   throwaway D3D11 EXE (e.g. `notepad++.exe`) and pick "DirectX 10/11/12".
-3. Find `dxgi.dll` in the throwaway dir, copy it to this repo root.
-4. (Optional) verify with `sha256sum dxgi.dll` and pin the hash in
-   `CHANGELOG.md` so users can audit.
+2. Run the installer against any throwaway D3D11 EXE (e.g. `notepad++.exe`).
+   Pick "DirectX 10/11/12" when asked.
+3. The installer drops `dxgi.dll` next to the throwaway EXE. Copy that file
+   into your Neocron install root (next to `neocronclient.exe`).
 
-### 4. Drop in shaders
+### 2. Shader pack
 
-1. Clone `https://github.com/crosire/reshade-shaders` (the "slim" branch is a
-   smaller curated set).
-2. Copy its `Shaders/` and `Textures/` into this repo's `reshade-shaders/`.
-3. Pick a sane default in `ReShadePreset.ini` — the default enables
-   LumaSharpen + SMAA + AmbientLight, which most users will like.
-
-### 5. Verify the layout
-
-```
-neocron-graphics-pack/
-├── addon.json
-├── README.md
-├── LICENSE
-├── CHANGELOG.md
-├── .gitattributes
-├── D3D8.dll               <- dgVoodoo2 wrapper (you provide)
-├── dgVoodoo.conf          <- preset
-├── dxgi.dll               <- ReShade (you provide)
-├── ReShade.ini            <- minimal preset
-├── ReShadePreset.ini      <- default-enabled effects
-└── reshade-shaders/
-    ├── Shaders/           <- you provide (.fx files)
-    └── Textures/          <- you provide (.png/.dds)
-```
-
-Quick sanity check:
 ```bash
+git clone -b slim --depth 1 https://github.com/crosire/reshade-shaders \
+  /tmp/reshade-shaders
+cp -r /tmp/reshade-shaders/Shaders /tmp/reshade-shaders/Textures \
+  ~/Neocron2/reshade-shaders/
+```
+
+(Adjust `~/Neocron2/` to your install dir.)
+
+### 3. Verify
+
+```bash
+cd ~/Neocron2  # your Neocron install dir
 test -f D3D8.dll && test -f dxgi.dll && \
   test -d reshade-shaders/Shaders && echo "Layout OK" || echo "Missing files"
 ```
 
-### 6. Tag and push
+`D3D8.dll` is staged automatically by the launcher; the other two are what
+the manual steps add.
 
-```bash
-git add .
-git commit -m "v0.1.0 — initial dgVoodoo2 + ReShade pack"
-git tag v0.1.0
-git push origin main --tags
-```
+## Forking and customizing
 
-The launcher fetches via `https://api.github.com/repos/<owner>/<repo>/tarball`,
-so any public GitHub repo works. The tag is read by `CheckAddonUpdates`.
+If you want to publish your own variant (different shader presets, different
+dgVoodoo settings):
+
+1. Fork or clone:
+   ```bash
+   git clone https://github.com/igwtech/neocron-graphics-pack.git
+   cd neocron-graphics-pack
+   ```
+2. Edit `dgVoodoo.conf` and/or `ReShadePreset.ini` to taste.
+3. Update `addon.json`'s `id` (must be unique) and `version`.
+4. Push to your fork. Users install via the fork's URL.
+
+The auto-fetch URL in `addon.json` can also be retargeted — pin a different
+dgVoodoo2 release, or reference an internal mirror.
 
 ## How the launcher integrates
 
@@ -122,10 +105,11 @@ When this addon is enabled:
 
 | Mechanism | What happens |
 |---|---|
-| **DLL drop-in** | `D3D8.dll`, `dxgi.dll`, configs, shader pack are stamped into the game install dir. |
-| **Wine DLL overrides** | The `wineDllOverrides: ["d3d8", "dxgi"]` field tells the launcher to add `d3d8=n,b;dxgi=n,b` to `WINEDLLOVERRIDES`. Native-then-builtin means Wine prefers the dropped-in DLLs. |
-| **Pristine pool** | Original game files are snapshotted before being overwritten. Disabling the addon restores them — even if other addons stamp the same paths, the launcher's stacked-restore handles layering. |
-| **CDN-update safety** | When the launcher patches the game from the official CDN, it un-stamps addons first, lets the updater run on pristine, refreshes the pristine pool, then re-stamps. Wrapper DLLs survive game patches. |
+| **Repo files** | `dgVoodoo.conf`, `ReShade.ini`, `ReShadePreset.ini`, and `reshade-shaders/` directory tree are stamped from this repo into the game install dir. |
+| **Auto-fetch** | The `fetch` field in `addon.json` triggers download of the dgVoodoo2 release zip, extraction, and staging of `MS/x86/D3D8.dll` — without us redistributing the file. |
+| **Wine DLL overrides** | `wineDllOverrides: ["d3d8", "dxgi"]` adds `d3d8=n,b;dxgi=n,b` to `WINEDLLOVERRIDES`. Native-then-builtin makes Wine prefer the dropped-in DLLs. |
+| **Pristine pool** | Original game files are snapshotted before being overwritten. Disabling restores them — even with other addons stamping the same paths, the launcher's stacked-restore handles layering. |
+| **CDN-update safety** | When the launcher patches the game, it un-stamps addons first, lets the updater run on pristine, refreshes the pristine pool, then re-stamps. Wrapper DLLs survive game patches. |
 
 You don't need to think about any of this. Install once, play.
 
@@ -146,9 +130,9 @@ You don't need to think about any of this. Install once, play.
 
 | Symptom | Likely cause |
 |---|---|
-| Game starts but no ReShade overlay | `dxgi.dll` not loaded — check `WINEDLLOVERRIDES` includes `dxgi=n,b` |
-| Black screen | dgVoodoo `D3D8.dll` mismatch (x64 instead of x86) |
-| ReShade shaders missing | `reshade-shaders/` empty — see step 4 |
+| Game starts but no ReShade overlay | `dxgi.dll` not in install dir — rerun manual step 1 |
+| Black screen | dgVoodoo `D3D8.dll` missing or x64 built (the auto-fetch picks x86) |
+| ReShade shaders missing | `reshade-shaders/Shaders/` empty — rerun manual step 2 |
 | Game patch broke wrapper | Re-launch the launcher; the post-update hook re-stamps automatically |
 | HUD misaligned | dgVoodoo resolution forced — set `Resolution = unforced` in `dgVoodoo.conf` |
 
@@ -161,9 +145,9 @@ Logs to check (Linux):
 
 - This repo's code, configs, docs: **MIT** (see `LICENSE`)
 - `D3D8.dll` (dgVoodoo2): **freeware**, redistribution allowed under the
-  dgVoodoo2 license. Attribution: Dege.
-- `dxgi.dll` (ReShade): **BSD 3-Clause**. Attribution: Patrick Mours.
-- `reshade-shaders/`: per upstream — typically MIT or BSD per shader.
-  See `reshade-shaders/LICENSE` if shipping the crosire pack.
-
-If you fork and redistribute, preserve all upstream license notices.
+  dgVoodoo2 license. Auto-fetched at install time from upstream — never
+  redistributed by this repo. Attribution: Dege.
+- `dxgi.dll` (ReShade): **BSD 3-Clause**, but upstream asks redistributors
+  not to bundle. We don't bundle. Manual install. Attribution: Patrick Mours.
+- `reshade-shaders/`: per upstream — typically MIT/BSD per shader. Cloned
+  fresh by the user per upstream's preference.

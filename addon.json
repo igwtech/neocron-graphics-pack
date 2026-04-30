@@ -7,12 +7,19 @@
   "category": "graphics",
   "tags": ["dgvoodoo", "reshade", "directx", "d3d8", "renderer", "shaders"],
   "files": [
-    { "src": "D3D8.dll",        "dst": "D3D8.dll" },
-    { "src": "dgVoodoo.conf",   "dst": "dgVoodoo.conf" },
-    { "src": "dxgi.dll",        "dst": "dxgi.dll" },
-    { "src": "ReShade.ini",     "dst": "ReShade.ini" },
-    { "src": "ReShadePreset.ini","dst": "ReShadePreset.ini" },
-    { "src": "reshade-shaders", "dst": "reshade-shaders" }
+    { "src": "dgVoodoo.conf",        "dst": "dgVoodoo.conf" },
+    { "src": "ReShade.ini",          "dst": "ReShade.ini" },
+    { "src": "ReShadePreset.ini",    "dst": "ReShadePreset.ini" },
+    { "src": "reshade-shaders",      "dst": "reshade-shaders" }
+  ],
+  "fetch": [
+    {
+      "from": "https://github.com/dege-diosg/dgVoodoo2/releases/download/v2.87.1/dgVoodoo2_87_1.zip",
+      "extract": "zip",
+      "files": [
+        { "src": "MS/x86/D3D8.dll", "dst": "D3D8.dll" }
+      ]
+    }
   ],
   "wineDllOverrides": ["d3d8", "dxgi"],
   "conflicts": [],
