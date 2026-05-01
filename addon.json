@@ -1,15 +1,16 @@
 {
   "id": "neocron-graphics-pack",
-  "name": "Enhanced Graphics (dgVoodoo2 + ReShade)",
-  "version": "0.2.1",
+  "name": "Enhanced Graphics (dgVoodoo2 + ReShade / vkBasalt)",
+  "version": "0.3.0",
   "author": "Neocron Community",
-  "description": "Modernizes Neocron 2's renderer by wrapping DirectX 8/9 through dgVoodoo2 (D3D11 backend) and stacking ReShade on top for post-processing shaders. Works under Proton, native Wine, and Windows.",
+  "description": "Modernizes Neocron 2's renderer. Windows native uses dgVoodoo2 (DX8/9 → D3D11) + ReShade for post-processing. Linux/macOS use vkBasalt as a Vulkan post-processing layer, since dgVoodoo2's D3D9 wrapper is incompatible with Wine/Proton's DXVK path.",
   "category": "graphics",
-  "tags": ["dgvoodoo", "reshade", "directx", "d3d8", "d3d9", "renderer", "shaders"],
+  "tags": ["dgvoodoo", "reshade", "vkbasalt", "directx", "vulkan", "renderer", "shaders"],
   "files": [
-    { "src": "dgVoodoo.conf",     "dst": "dgVoodoo.conf" },
-    { "src": "ReShade.ini",       "dst": "ReShade.ini" },
-    { "src": "ReShadePreset.ini", "dst": "ReShadePreset.ini" }
+    { "src": "vkBasalt.conf",     "dst": "vkBasalt.conf",     "os": ["linux", "darwin"] },
+    { "src": "dgVoodoo.conf",     "dst": "dgVoodoo.conf",     "os": ["windows"] },
+    { "src": "ReShade.ini",       "dst": "ReShade.ini",       "os": ["windows"] },
+    { "src": "ReShadePreset.ini", "dst": "ReShadePreset.ini", "os": ["windows"] }
   ],
   "fetch": [
     {
@@ -18,14 +19,16 @@
       "files": [
         { "src": "MS/x86/D3D8.dll", "dst": "D3D8.dll" },
         { "src": "MS/x86/D3D9.dll", "dst": "D3D9.dll" }
-      ]
+      ],
+      "os": ["windows"]
     },
     {
       "from": "https://reshade.me/downloads/ReShade_Setup_6.7.3_Addon.exe",
       "extract": "exe",
       "files": [
         { "src": "ReShade32.dll", "dst": "dxgi.dll" }
-      ]
+      ],
+      "os": ["windows"]
     },
     {
       "from": "https://github.com/crosire/reshade-shaders/archive/refs/heads/nvidia.tar.gz",
@@ -37,10 +40,21 @@
         { "src": "reshade-shaders-nvidia/ShadersAndTextures/*.jpg", "dst": "reshade-shaders/Textures" },
         { "src": "reshade-shaders-nvidia/ShadersAndTextures/*.dds", "dst": "reshade-shaders/Textures" },
         { "src": "reshade-shaders-nvidia/ShadersAndTextures/*.tga", "dst": "reshade-shaders/Textures" }
-      ]
+      ],
+      "os": ["windows"]
     }
   ],
   "wineDllOverrides": ["d3d8", "d3d9", "dxgi"],
+  "envVars": {
+    "linux": {
+      "ENABLE_VKBASALT":      "1",
+      "VKBASALT_CONFIG_FILE": "${INSTALL_DIR}/vkBasalt.conf"
+    },
+    "darwin": {
+      "ENABLE_VKBASALT":      "1",
+      "VKBASALT_CONFIG_FILE": "${INSTALL_DIR}/vkBasalt.conf"
+    }
+  },
   "conflicts": [],
   "requires": []
 }
