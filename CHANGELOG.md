@@ -2,6 +2,56 @@
 
 All notable changes to this addon will be documented in this file.
 
+## [0.3.0] — Unreleased
+
+**Linux/macOS now uses vkBasalt instead of dgVoodoo2 + ReShade.** Live
+testing of v0.2.1 confirmed that dgVoodoo2's D3D9 wrapper crashes the
+game (exit code 5, infinite "Init D3D object → Shutdown driver" loop)
+when run under Wine/Proton with DXVK — the issue is specific to
+dgVoodoo2's D3D11-internal path failing to initialize against DXVK,
+and persists across `OutputAPI` settings. ReShade alone can't help
+because it doesn't hook D3D9.
+
+vkBasalt is the right tool for this side: a Vulkan post-processing
+layer that injects directly into the DXVK swapchain, no DLL juggling
+needed. It ships built-in SMAA + CAS (matching what our preset wanted
+from ReShade) and can also load ReShade `.fx` shaders for Bloom/
+LevelsPlus/Vibrance in a future bump.
+
+### Changed
+
+- `addon.json` schema now requires the launcher's platform-conditional
+  fields (Neocron-Launcher v0.3+):
+    - `os` array on each `files`/`fetch` entry — gates the entry to
+      specific platforms.
+    - `envVars` map keyed by platform — declares env vars to set on
+      the game process.
+- **Linux/macOS path**:
+    - Ships `vkBasalt.conf` with SMAA + CAS effects (built-ins, no
+      `.fx` files needed).
+    - Sets `ENABLE_VKBASALT=1` and `VKBASALT_CONFIG_FILE=<install_dir>/
+      vkBasalt.conf` via `envVars`.
+    - Skips the dgVoodoo2 + ReShade fetches entirely.
+    - Requires `vkbasalt` and `lib32-vkbasalt` (Neocron is 32-bit).
+- **Windows path**: unchanged from v0.2.1 — dgVoodoo2 (DX8 + DX9) +
+  ReShade + the crosire shader pack.
+
+### Why not just keep dgVoodoo2 + ReShade everywhere
+
+dgVoodoo2 is Windows-native software. It works under Wine, but its
+D3D9 wrapper internally creates a D3D11 device via DXGI, and that
+chain hits a DXVK incompatibility we couldn't work around with the
+v2.87.1 binary. vkBasalt skips that chain entirely.
+
+### Future
+
+- v0.3.1: load ReShade `.fx` shaders (Bloom, LevelsPlus, Vibrance,
+  AdaptiveSharpen) into vkBasalt for cyberpunk colour grading on
+  Linux too. Requires templating absolute shader paths into
+  `vkBasalt.conf` at install time.
+- v0.4.0: drop the dgVoodoo2 D3D8 fetch on Linux (currently still
+  shipped under `windows` only — confirmed correct in v0.3.0).
+
 ## [0.2.1] — Unreleased
 
 **Adds DirectX 9 support for Neocron Evolution.** The Evolution build
