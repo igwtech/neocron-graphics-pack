@@ -1,16 +1,15 @@
 {
   "id": "neocron-graphics-pack",
   "name": "Enhanced Graphics (dgVoodoo2 + ReShade)",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "author": "Neocron Community",
   "description": "Modernizes Neocron 2's renderer by wrapping DirectX 8 through dgVoodoo2 (D3D11 backend) and stacking ReShade on top for post-processing shaders. Works under Proton, native Wine, and Windows.",
   "category": "graphics",
   "tags": ["dgvoodoo", "reshade", "directx", "d3d8", "renderer", "shaders"],
   "files": [
-    { "src": "dgVoodoo.conf",        "dst": "dgVoodoo.conf" },
-    { "src": "ReShade.ini",          "dst": "ReShade.ini" },
-    { "src": "ReShadePreset.ini",    "dst": "ReShadePreset.ini" },
-    { "src": "reshade-shaders",      "dst": "reshade-shaders" }
+    { "src": "dgVoodoo.conf",     "dst": "dgVoodoo.conf" },
+    { "src": "ReShade.ini",       "dst": "ReShade.ini" },
+    { "src": "ReShadePreset.ini", "dst": "ReShadePreset.ini" }
   ],
   "fetch": [
     {
@@ -19,14 +18,28 @@
       "files": [
         { "src": "MS/x86/D3D8.dll", "dst": "D3D8.dll" }
       ]
+    },
+    {
+      "from": "https://reshade.me/downloads/ReShade_Setup_6.7.3_Addon.exe",
+      "extract": "exe",
+      "files": [
+        { "src": "ReShade32.dll", "dst": "dxgi.dll" }
+      ]
+    },
+    {
+      "from": "https://github.com/crosire/reshade-shaders/archive/refs/heads/nvidia.tar.gz",
+      "extract": "tar.gz",
+      "files": [
+        { "src": "reshade-shaders-nvidia/ShadersAndTextures/*.fx",  "dst": "reshade-shaders/Shaders" },
+        { "src": "reshade-shaders-nvidia/ShadersAndTextures/*.fxh", "dst": "reshade-shaders/Shaders" },
+        { "src": "reshade-shaders-nvidia/ShadersAndTextures/*.png", "dst": "reshade-shaders/Textures" },
+        { "src": "reshade-shaders-nvidia/ShadersAndTextures/*.jpg", "dst": "reshade-shaders/Textures" },
+        { "src": "reshade-shaders-nvidia/ShadersAndTextures/*.dds", "dst": "reshade-shaders/Textures" },
+        { "src": "reshade-shaders-nvidia/ShadersAndTextures/*.tga", "dst": "reshade-shaders/Textures" }
+      ]
     }
   ],
   "wineDllOverrides": ["d3d8", "dxgi"],
-  "expects": [
-    "dxgi.dll",
-    "reshade-shaders/Shaders",
-    "reshade-shaders/Textures"
-  ],
   "conflicts": [],
   "requires": []
 }
