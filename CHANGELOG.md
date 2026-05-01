@@ -2,6 +2,74 @@
 
 All notable changes to this addon will be documented in this file.
 
+## [0.3.1] — Unreleased
+
+**Full cyberpunk preset for Linux/macOS via vkBasalt** — matches the
+Windows ReShade preset, with all tuning baked into the shipped `.fx`
+files since vkBasalt 0.3.2.10 doesn't read `ReShadePreset.ini`.
+
+The earlier "no AA on Linux" finding was a misdiagnosis: vkBasalt's
+`effects` field is **colon**-separated (`smaa:cas`), not comma. With
+commas it's parsed as a single literal effect name and crashes at
+shader-load time. Once corrected, SMAA works fine.
+
+### Effects shipped (Linux/macOS)
+
+`smaa:mxao:ssdo:ssr:bloom:levelsplus:vibrance:lut:adaptivesharpen` —
+full cyberpunk stack including:
+
+- **SMAA** — vkBasalt built-in, threshold 0.05, 32 search steps.
+- **MXAO** (qUINT_mxao) — SSAO + SSIL (indirect lighting) for
+  object grounding and BSP corner shading.
+- **SSDO** (PPFX_SSDO) — directional occlusion stacked on MXAO for
+  visible BSP edges.
+- **SSR** (qUINT_ssr) — screen-space reflections with subtle wet-
+  asphalt tuning (no chrome-mirror look).
+- **Bloom** (cyan-tinted) — neon spill onto walls.
+- **LevelsPlus** — gamma 0.40 lift compensates for the AO stack
+  darkening; no black crush.
+- **Vibrance** — gentle 0.10, lets Bloom + SSIL carry the saturation.
+- **LUT** — procedural cyberpunk grading: cool-shadow / magenta-
+  highlight / mild vibrance / slight black crush. Shipped as a
+  1024×32 PNG at `reshade-shaders/Textures/neocron_cyberpunk_lut.png`.
+- **AdaptiveSharpen** — final detail recovery for blurred textures.
+
+### Required launcher
+
+This addon ships tuned `.fx` files in `files[]` that override the
+fetched defaults. Requires Neocron-Launcher with the
+**stamp-files-after-fetch** ordering fix (PR igwtech/Neocron-Launcher#7).
+
+### Required runtime deps
+
+- `vkbasalt` + `lib32-vkbasalt` (Arch / Manjaro: `yay -S vkbasalt
+  lib32-vkbasalt`).
+
+### New auto-fetch entries
+
+- **qUINT** (Marty McFly, MIT) — <https://github.com/martymcmodding/qUINT>.
+  Linux/macOS only. Provides `qUINT_mxao.fx` (better MXAO with SSIL)
+  and `qUINT_ssr.fx` (screen-space reflections).
+- **crosire/reshade-shaders** is now fetched on every platform (was
+  Windows-only in v0.3.0). Linux needs the include headers
+  (`ReShade.fxh`, `ReShadeUI.fxh`, etc.) for our modified shaders to
+  compile.
+
+### Tuning workflow
+
+`tools/build_lut.py` regenerates the LUT from the procedural recipe.
+`tools/tune_shaders.py` re-applies our uniform overrides to fresh
+`.fx` files (idempotent — keeps `.fx.orig` backups). Both scripts
+ship in the repo so users can edit and rebuild without diffing.
+
+### Known limitations
+
+- The Linux preset on the **2D login screen** picks up an olive-green
+  cast because MXAO/SSDO/SSR have no real depth on a flat image.
+  Press **Home** in-game to toggle the chain off in menus.
+- Game-side gamma should be left at default (1.0) — the preset
+  expects raw input. Cranking in-game gamma double-lifts midtones.
+
 ## [0.3.0] — Unreleased
 
 **Linux/macOS now uses vkBasalt instead of dgVoodoo2 + ReShade.** Live

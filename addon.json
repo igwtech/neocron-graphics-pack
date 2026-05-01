@@ -1,16 +1,42 @@
 {
   "id": "neocron-graphics-pack",
   "name": "Enhanced Graphics (dgVoodoo2 + ReShade / vkBasalt)",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "author": "Neocron Community",
-  "description": "Modernizes Neocron 2's renderer. Windows native uses dgVoodoo2 (DX8/9 → D3D11) + ReShade for post-processing. Linux/macOS use vkBasalt as a Vulkan post-processing layer, since dgVoodoo2's D3D9 wrapper is incompatible with Wine/Proton's DXVK path.",
+  "description": "Modernizes Neocron 2's renderer. Windows native uses dgVoodoo2 (DX8/9 → D3D11) + ReShade with a curated cyberpunk preset. Linux/macOS use vkBasalt as a Vulkan post-processing layer with the same ReShade .fx shaders (SMAA + MXAO + SSDO + SSR + Bloom + LevelsPlus + Vibrance + cyberpunk LUT + AdaptiveSharpen) baked with our tuning since vkBasalt doesn't read ReShade preset files.",
   "category": "graphics",
-  "tags": ["dgvoodoo", "reshade", "vkbasalt", "directx", "vulkan", "renderer", "shaders"],
+  "tags": ["dgvoodoo", "reshade", "vkbasalt", "directx", "vulkan", "ssr", "ao", "renderer", "shaders"],
   "files": [
     { "src": "vkBasalt.conf",     "dst": "vkBasalt.conf",     "os": ["linux", "darwin"] },
     { "src": "dgVoodoo.conf",     "dst": "dgVoodoo.conf",     "os": ["windows"] },
     { "src": "ReShade.ini",       "dst": "ReShade.ini",       "os": ["windows"] },
-    { "src": "ReShadePreset.ini", "dst": "ReShadePreset.ini", "os": ["windows"] }
+    { "src": "ReShadePreset.ini", "dst": "ReShadePreset.ini", "os": ["windows"] },
+
+    { "src": "reshade-shaders/Textures/neocron_cyberpunk_lut.png",
+      "dst": "reshade-shaders/Textures/neocron_cyberpunk_lut.png",
+      "os": ["linux", "darwin"] },
+
+    { "src": "reshade-shaders/Shaders/Bloom.fx",
+      "dst": "reshade-shaders/Shaders/Bloom.fx",
+      "os": ["linux", "darwin"] },
+    { "src": "reshade-shaders/Shaders/qUINT_mxao.fx",
+      "dst": "reshade-shaders/Shaders/qUINT_mxao.fx",
+      "os": ["linux", "darwin"] },
+    { "src": "reshade-shaders/Shaders/qUINT_ssr.fx",
+      "dst": "reshade-shaders/Shaders/qUINT_ssr.fx",
+      "os": ["linux", "darwin"] },
+    { "src": "reshade-shaders/Shaders/PPFX_SSDO.fx",
+      "dst": "reshade-shaders/Shaders/PPFX_SSDO.fx",
+      "os": ["linux", "darwin"] },
+    { "src": "reshade-shaders/Shaders/LevelsPlus.fx",
+      "dst": "reshade-shaders/Shaders/LevelsPlus.fx",
+      "os": ["linux", "darwin"] },
+    { "src": "reshade-shaders/Shaders/Vibrance.fx",
+      "dst": "reshade-shaders/Shaders/Vibrance.fx",
+      "os": ["linux", "darwin"] },
+    { "src": "reshade-shaders/Shaders/AdaptiveSharpen.fx",
+      "dst": "reshade-shaders/Shaders/AdaptiveSharpen.fx",
+      "os": ["linux", "darwin"] }
   ],
   "fetch": [
     {
@@ -40,8 +66,16 @@
         { "src": "reshade-shaders-nvidia/ShadersAndTextures/*.jpg", "dst": "reshade-shaders/Textures" },
         { "src": "reshade-shaders-nvidia/ShadersAndTextures/*.dds", "dst": "reshade-shaders/Textures" },
         { "src": "reshade-shaders-nvidia/ShadersAndTextures/*.tga", "dst": "reshade-shaders/Textures" }
+      ]
+    },
+    {
+      "from": "https://github.com/martymcmodding/qUINT/archive/refs/heads/master.tar.gz",
+      "extract": "tar.gz",
+      "files": [
+        { "src": "qUINT-master/Shaders/*.fx",  "dst": "reshade-shaders/Shaders" },
+        { "src": "qUINT-master/Shaders/*.fxh", "dst": "reshade-shaders/Shaders" }
       ],
-      "os": ["windows"]
+      "os": ["linux", "darwin"]
     }
   ],
   "wineDllOverrides": ["d3d8", "d3d9", "dxgi"],

@@ -11,13 +11,18 @@ The addon takes a **different path per platform**, because the obvious
 | Platform | Approach |
 |---|---|
 | **Windows native** | `dgVoodoo2` (DX8/DX9 → D3D11) + `ReShade` (hooks D3D11 swapchain) + curated shader pack |
-| **Linux / macOS (Wine/Proton)** | `vkBasalt` Vulkan post-processing layer (built-in SMAA + CAS) |
+| **Linux / macOS (Wine/Proton)** | `vkBasalt` Vulkan post-processing layer with the same ReShade `.fx` shaders, tuned values baked in |
 
 Why two paths? dgVoodoo2's D3D9 wrapper internally calls D3D11, and that
 chain hits a known DXVK incompatibility — verified live with v0.2.1, the
 game crashes with exit code 5 in a "Init D3D object → Shutdown driver"
 loop. vkBasalt sidesteps the issue entirely by hooking at the Vulkan
 layer, after DXVK has already done D3D9→Vulkan translation.
+
+The downside of vkBasalt is that it doesn't read ReShade preset files,
+so per-uniform tuning has to be **baked into the `.fx` shader files
+themselves**. v0.3.1 ships our tuned versions (with attribution) on top
+of the upstream pack fetched at install time.
 
 ## Installing in the launcher
 
@@ -56,15 +61,19 @@ Install [7-Zip](https://www.7-zip.org/) and ensure it's on `PATH`.
 | Component | Platforms | Source |
 |---|---|---|
 | `dgVoodoo.conf`, `ReShade.ini`, `ReShadePreset.ini` | Windows | bundled in this repo |
-| `vkBasalt.conf` | Linux, macOS | bundled in this repo |
+| `vkBasalt.conf`, cyberpunk LUT, tuned `.fx` shaders | Linux, macOS | bundled in this repo |
 | `D3D8.dll` + `D3D9.dll` (dgVoodoo2 v2.87.1, MS/x86) | Windows | <https://github.com/dege-diosg/dgVoodoo2/releases> |
 | `dxgi.dll` (ReShade 6.7.3, 32-bit) | Windows | <https://reshade.me/downloads/ReShade_Setup_6.7.3_Addon.exe> |
-| `reshade-shaders/Shaders/` + `Textures/` | Windows | <https://github.com/crosire/reshade-shaders> (nvidia branch) |
+| `reshade-shaders/Shaders/` + `Textures/` | All | <https://github.com/crosire/reshade-shaders> (nvidia branch) |
+| `qUINT_mxao.fx`, `qUINT_ssr.fx`, etc. | Linux, macOS | <https://github.com/martymcmodding/qUINT> (master, MIT) |
 
 ReShade's authors prefer that binaries not be redistributed — every user
 should pull fresh from the official site. Auto-fetch respects that: the
 files come from upstream URLs to the user's machine at install time, never
-mirrored or hosted by this repo.
+mirrored or hosted by this repo. The exception is the small set of `.fx`
+files where we ship our **tuned versions** to override the defaults
+(see "Effects shipped" below) — those are MIT/BSD-licensed by upstream
+with attribution preserved (see `LICENSE-VENDORED.md`).
 
 ## Effects shipped
 
@@ -74,15 +83,41 @@ mirrored or hosted by this repo.
 `Vibrance` + `AdaptiveSharpen`. Press **Home** in-game to open the ReShade
 overlay and tweak. See `ReShadePreset.ini` for tuning notes.
 
-### Linux / macOS (vkBasalt config)
+### Linux / macOS (vkBasalt preset)
 
-`SMAA` + `CAS` (built-in vkBasalt effects). Press **Home** to toggle
-on/off. See `vkBasalt.conf` for tuning.
+Full cyberpunk stack matching the Windows preset, tuning baked into the
+shipped `.fx` files since vkBasalt 0.3.2.10 doesn't read
+`ReShadePreset.ini`:
 
-The Linux/macOS preset is intentionally minimal in v0.3.x — built-in
-effects only, no external `.fx` shader files. A future v0.3.1 will add
-Bloom/LevelsPlus/Vibrance via vkBasalt's ReShade `.fx` loader to match
-the Windows preset's cyberpunk colour grading.
+```
+effects = smaa:mxao:ssdo:ssr:bloom:levelsplus:vibrance:lut:adaptivesharpen
+```
+
+| Effect | Source | Role |
+|---|---|---|
+| `smaa` | vkBasalt built-in | edge-crawl cleanup, threshold 0.05 |
+| `mxao` | qUINT_mxao.fx (tuned) | SSAO + SSIL — object grounding, BSP corner shading |
+| `ssdo` | PPFX_SSDO.fx (tuned) | directional occlusion stacked on MXAO for sharper edges |
+| `ssr` | qUINT_ssr.fx (tuned) | wet-asphalt screen-space reflections |
+| `bloom` | Bloom.fx (tuned, cyan-tinted) | neon spill |
+| `levelsplus` | LevelsPlus.fx (tuned, gamma 0.40 lift) | midtone compensation for the AO stack |
+| `vibrance` | Vibrance.fx (tuned, gentle 0.10) | mild saturation polish |
+| `lut` | `neocron_cyberpunk_lut.png` | cool-shadow / magenta-highlight grading |
+| `adaptivesharpen` | AdaptiveSharpen.fx (tuned) | final detail recovery |
+
+Press **Home** in-game to toggle the entire chain on/off. The 2D login
+screen takes the AO/SSR with no real depth and ends up green-tinted —
+toggle off in menus if it bothers you.
+
+#### Tuning your own preset
+
+`tools/build_lut.py` regenerates the cyberpunk LUT from a procedural
+recipe (numpy + PIL). Edit the tint magnitudes in the script and re-run
+to bake your own grading.
+
+`tools/tune_shaders.py` re-applies our uniform overrides to fresh `.fx`
+files. Idempotent, keeps `.fx.orig` backups. Use this if you re-fetch
+the upstream shader pack and want to re-bake our tuning.
 
 ## How the launcher integrates
 
