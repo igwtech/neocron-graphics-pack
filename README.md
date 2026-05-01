@@ -15,8 +15,13 @@ Game DirectX 8 calls
 ## Why this stack
 
 ReShade dropped DirectX 8 support, so it can't hook Neocron directly. dgVoodoo2
-promotes the DX8 calls to D3D11, which ReShade *can* hook through `dxgi.dll`.
+promotes the DX8/DX9 calls to D3D11, which ReShade *can* hook through `dxgi.dll`.
 This is the standard recipe for modernizing early-2000s games.
+
+The original Neocron 2 client uses **DirectX 8**; **Neocron Evolution** dropped
+DX8 and only renders through **DirectX 9**. The addon ships both `D3D8.dll` and
+`D3D9.dll` wrappers and overrides both, so it works regardless of which client
+is selected in the in-game Display Settings dialog.
 
 You get:
 - D3D11/12 backend with anisotropic filtering, MSAA, integer scaling
@@ -32,7 +37,7 @@ You get:
 That's it. The launcher auto-fetches all three upstream pieces (dgVoodoo2,
 ReShade, the shader pack) from their official sources and stamps them into
 the install dir alongside the configs from this repo. It also composes
-`WINEDLLOVERRIDES=quartz=n,b;d3d8=n,b;dxgi=n,b` for you — no Proton
+`WINEDLLOVERRIDES=quartz=n,b;d3d8=n,b;d3d9=n,b;dxgi=n,b` for you — no Proton
 tweaking required.
 
 > **Dependency**: the launcher needs `7z` on `PATH` to unpack the ReShade
@@ -46,7 +51,7 @@ tweaking required.
 | Component | Source | How |
 |---|---|---|
 | `dgVoodoo.conf`, `ReShade.ini`, `ReShadePreset.ini` | this repo | Bundled — copied straight in |
-| `D3D8.dll` (dgVoodoo2 v2.87.1, MS/x86) | <https://github.com/dege-diosg/dgVoodoo2/releases> | **Auto-fetched** at install |
+| `D3D8.dll` + `D3D9.dll` (dgVoodoo2 v2.87.1, MS/x86) | <https://github.com/dege-diosg/dgVoodoo2/releases> | **Auto-fetched** at install |
 | `dxgi.dll` (ReShade 6.7.3, 32-bit) | <https://reshade.me/downloads/ReShade_Setup_6.7.3_Addon.exe> | **Auto-fetched** at install (extracted with 7z) |
 | `reshade-shaders/Shaders/` + `Textures/` (curated pack) | <https://github.com/crosire/reshade-shaders> (nvidia branch) | **Auto-fetched** at install |
 
@@ -80,7 +85,7 @@ When this addon is enabled:
 |---|---|
 | **Repo files** | `dgVoodoo.conf`, `ReShade.ini`, and `ReShadePreset.ini` are stamped from this repo into the game install dir. |
 | **Auto-fetch** | Three `fetch` entries in `addon.json` pull dgVoodoo2 (zip → `D3D8.dll`), ReShade (.exe extracted with 7z → `dxgi.dll`), and the shader pack (tar.gz → glob-routed into `Shaders/` + `Textures/`). All from upstream URLs, never mirrored by this repo. |
-| **Wine DLL overrides** | `wineDllOverrides: ["d3d8", "dxgi"]` adds `d3d8=n,b;dxgi=n,b` to `WINEDLLOVERRIDES`. Native-then-builtin makes Wine prefer the dropped-in DLLs. |
+| **Wine DLL overrides** | `wineDllOverrides: ["d3d8", "d3d9", "dxgi"]` adds `d3d8=n,b;d3d9=n,b;dxgi=n,b` to `WINEDLLOVERRIDES`. Native-then-builtin makes Wine prefer the dropped-in DLLs. |
 | **Pristine pool** | Original game files are snapshotted before being overwritten. Disabling restores them — even with other addons stamping the same paths, the launcher's stacked-restore handles layering. |
 | **CDN-update safety** | When the launcher patches the game, it un-stamps addons first, lets the updater run on pristine, refreshes the pristine pool, then re-stamps. Wrapper DLLs survive game patches. |
 

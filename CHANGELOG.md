@@ -2,7 +2,29 @@
 
 All notable changes to this addon will be documented in this file.
 
-## [0.2.0] — Unreleased
+## [0.2.1] — Unreleased
+
+**Adds DirectX 9 support for Neocron Evolution.** The Evolution build
+dropped DX8 and only renders through DX9, so the existing `D3D8.dll`
+wrapper sat idle and ReShade never hooked the swapchain. v0.2.1 ships
+`D3D9.dll` alongside `D3D8.dll` and overrides both — works for either
+client variant without user intervention.
+
+### Changed
+
+- Fetch entry for dgVoodoo2 now extracts both `MS/x86/D3D8.dll` and
+  `MS/x86/D3D9.dll` into the install dir.
+- `wineDllOverrides`: `["d3d8", "d3d9", "dxgi"]` (was `["d3d8", "dxgi"]`).
+- README clarifies that NC2 retail is DX8 and Evolution is DX9.
+
+### Why
+
+The in-game Display Settings dialog on Evolution only offers `(D3D9/0)`
+as a renderer — there is no DX8 option. Without this fix, the addon
+appears installed but produces no visible effect because the wrapper
+DLL the game loads (`D3D9.dll`) doesn't exist.
+
+## [0.2.0] — 2026-05-01
 
 **Zero manual steps.** The two pieces that previously required hand-installing
 (ReShade `dxgi.dll` and the crosire shader pack) are now auto-fetched by the
