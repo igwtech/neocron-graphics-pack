@@ -2,6 +2,34 @@
 
 All notable changes to this addon will be documented in this file.
 
+## [0.3.1] — Unreleased
+
+**Drop SMAA from the Linux/macOS preset — vkBasalt's AA path crashes
+the game.** Live testing of v0.3.0 found that both `effects = smaa,cas`
+and `effects = fxaa,cas` cause Neocron Evolution to crash during D3D9
+init under DXVK 2.x + vkBasalt 0.3.2.10 + Proton GE-9-26. CAS-only
+launches cleanly and applies as expected.
+
+Conclusion: vkBasalt's anti-aliasing implementations don't tolerate
+Neocron's swapchain format. CAS (Contrast Adaptive Sharpening) works
+reliably and is the single most visible effect on a 2002-era engine,
+so we ship it alone for now.
+
+### Changed
+
+- `vkBasalt.conf`: `effects = cas` only (was `effects = smaa,cas`).
+- All SMAA tuning lines removed (no longer relevant).
+- Comment block in the conf documents the AA crash so future editors
+  don't reintroduce it.
+
+### Future
+
+- Once a minimal repro of the AA crash is built outside Neocron we
+  can file upstream. Until then, SMAA stays out.
+- v0.3.2 may try `dls` (Denoised Luma Sharpening) as a complement to
+  CAS — different code path from SMAA/FXAA, may not hit the same
+  swapchain incompatibility.
+
 ## [0.3.0] — Unreleased
 
 **Linux/macOS now uses vkBasalt instead of dgVoodoo2 + ReShade.** Live

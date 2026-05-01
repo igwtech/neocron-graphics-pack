@@ -11,7 +11,7 @@ The addon takes a **different path per platform**, because the obvious
 | Platform | Approach |
 |---|---|
 | **Windows native** | `dgVoodoo2` (DX8/DX9 → D3D11) + `ReShade` (hooks D3D11 swapchain) + curated shader pack |
-| **Linux / macOS (Wine/Proton)** | `vkBasalt` Vulkan post-processing layer (built-in SMAA + CAS) |
+| **Linux / macOS (Wine/Proton)** | `vkBasalt` Vulkan post-processing layer (built-in CAS sharpening) |
 
 Why two paths? dgVoodoo2's D3D9 wrapper internally calls D3D11, and that
 chain hits a known DXVK incompatibility — verified live with v0.2.1, the
@@ -76,13 +76,21 @@ overlay and tweak. See `ReShadePreset.ini` for tuning notes.
 
 ### Linux / macOS (vkBasalt config)
 
-`SMAA` + `CAS` (built-in vkBasalt effects). Press **Home** to toggle
+`CAS` only — Contrast Adaptive Sharpening, recovers texture detail
+buried under DXVK's bilinear filtering. Press **Home** to toggle
 on/off. See `vkBasalt.conf` for tuning.
 
-The Linux/macOS preset is intentionally minimal in v0.3.x — built-in
-effects only, no external `.fx` shader files. A future v0.3.1 will add
-Bloom/LevelsPlus/Vibrance via vkBasalt's ReShade `.fx` loader to match
-the Windows preset's cyberpunk colour grading.
+> **Why no SMAA?** Both `effects = smaa,cas` and `effects = fxaa,cas`
+> were tested live and crash Neocron Evolution during D3D9 init under
+> DXVK 2.x + vkBasalt 0.3.2.10 + Proton GE-9-26. vkBasalt's
+> anti-aliasing implementations don't tolerate Neocron's swapchain
+> format. CAS-only launches cleanly. We'll revisit SMAA when upstream
+> vkBasalt fixes the AA crash.
+
+The Linux/macOS preset is intentionally minimal — built-in effects
+only, no external `.fx` shader files. A future version may add
+Bloom/LevelsPlus/Vibrance via vkBasalt's ReShade `.fx` loader to
+match the Windows preset's cyberpunk colour grading.
 
 ## How the launcher integrates
 

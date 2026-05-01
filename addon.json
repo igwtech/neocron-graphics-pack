@@ -1,7 +1,7 @@
 {
   "id": "neocron-graphics-pack",
   "name": "Enhanced Graphics (dgVoodoo2 + ReShade / vkBasalt)",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "author": "Neocron Community",
   "description": "Modernizes Neocron 2's renderer. Windows native uses dgVoodoo2 (DX8/9 → D3D11) + ReShade for post-processing. Linux/macOS use vkBasalt as a Vulkan post-processing layer, since dgVoodoo2's D3D9 wrapper is incompatible with Wine/Proton's DXVK path.",
   "category": "graphics",
